@@ -78,10 +78,17 @@ module Spreadsheet
       assert_equal 20, @sheet.column(1).width
     end
 
-    def test_should_get_and_set_locked
-      assert_nil @sheet.locked
-      @sheet.locked = true
-      assert @sheet.locked
+    def test_should_get_and_set_protect
+      assert_nil @sheet.protect
+      @sheet.protect = true
+      assert @sheet.protect
+    end
+
+    def test_should_set_and_encrypt_password
+      #abcdefghij == 0xFEF1 is the example at http://www.openoffice.org/sc/excelfileformat.pdf
+      assert_nil @sheet.password
+      @sheet.password = "abcdefghij"
+      assert_equal 0xFEF1, @sheet.password
     end
 
   end
