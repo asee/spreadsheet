@@ -16,4 +16,10 @@ Hoe.spec('spreadsheet') do |p|
    p.extra_deps << ['ruby-ole', '>=1.0']
 end
 
+Rake::TestTask.new do |t|
+  t.libs << "test"
+  t.test_files = FileList['test/suite.rb']
+  t.verbose = true
+end
+
 # vim: syntax=Ruby
