@@ -472,6 +472,7 @@ and minimal code that generates this warning. Thanks!
     # ○  Page Settings Block ➜ 4.4
     # ●  Worksheet Protection Block ➜ 4.18
     write_protection
+    write_password
     # ○  DEFCOLWIDTH ➜ 5.32
     write_defcolwidth
     # ○○ COLINFO ➜ 5.18
@@ -676,9 +677,17 @@ and minimal code that generates this warning. Thanks!
     end
     write_cell :number, row, idx, value
   end
+  ##
+  # Write the password value if present
+  def write_password
+    if val = @worksheet.password
+      write_op 0x0013, [val].pack('v')
+    end
+  end
+  ##
   # Write the protection value: 0 for no protection, 1 for protection
   def write_protection
-    val = @worksheet.locked ? 0x0001 : 0x0000
+    val = @worksheet.protect ? 0x0001 : 0x0000
     write_op 0x0012, [val].pack('v')
   end
   def write_op op, *args

@@ -26,8 +26,8 @@ module Spreadsheet
   class Worksheet
     include Spreadsheet::Encodings
     include Enumerable
-    attr_accessor :name, :selected, :workbook, :locked
-    attr_reader :rows, :columns, :merged_cells
+    attr_accessor :name, :selected, :workbook, :protect
+    attr_reader :rows, :columns, :merged_cells, :password
     def initialize opts={}
       @default_format = nil
       @selected = opts[:selected]
@@ -192,6 +192,13 @@ module Spreadsheet
     def last_row_index
       [dimensions[1] - 1, 0].max
     end
+    ## Sets and encrypts the password for this worksheet
+    def password= new_password
+      if new_password.is_a?(String)
+        new_password = encrypt_password(new_password)
+      end
+      @password = new_password
+    end
     ##
     # Replace the Row at _idx_ with the following arguments. Like #update_row,
     # but truncates the Row if there are fewer arguments than Cells in the Row.
@@ -259,6 +266,25 @@ module Spreadsheet
       @merged_cells.push [start_row, end_row, start_col, end_col]
     end
     private
+    # Pseudocode from http://www.openoffice.org/sc/excelfileformat.pdf
+    # ALGORITHM Get_Password_Hash( password )
+    # 1) hash ← 0 ; char_index ← char_count ← character count of password
+    # 2) char_index ← char_index - 1
+    # 3) char ← character from password with index char_index {0 is leftmost character}
+    # 4) hash ← hash XOR char
+    # 5) rotate the lower 15 bits of hash left by 1 bit
+    # 6) IF char_index > 0 THEN JUMP 2)
+    # 7) RETURN hash XOR char_count XOR CE4B
+    def encrypt_password the_password
+      hash = 0
+      the_password.reverse.bytes.each do |b|
+        hash = hash ^ b
+        top = ( hash << 1 ) & ( 1 << 15 ) - 1
+        bottom = hash >> 14
+        hash = top | bottom
+      end
+      hash ^ the_password.length ^ 0xCE4B
+    end
     def index_of_first ary # :nodoc:
       return unless ary
       ary.index(ary.find do |elm| elm end)

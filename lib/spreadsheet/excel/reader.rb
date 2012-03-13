@@ -866,6 +866,10 @@ class Reader
         read_window2 worksheet, work, pos, len
       when :mergedcells # ○○ MERGEDCELLS	➜ 5.67
         read_merged_cells worksheet, work, pos, len
+      when :protect
+        read_worksheet_protect worksheet, work, pos, len
+      when :password
+        read_worksheet_password worksheet, work, pos, len
       else
         if ROW_BLOCK_OPS.include?(op)
           set_missing_row_address worksheet, work, pos, len
@@ -873,6 +877,12 @@ class Reader
       end
       previous = op
     end
+  end
+  def read_worksheet_password worksheet, work, pos, len
+    worksheet.password = work.unpack(binfmt(:blank)).first
+  end
+  def read_worksheet_protect worksheet, work, pos, len
+    worksheet.protect = work.unpack(binfmt(:blank)).first == 1
   end
   def read_guts worksheet, work, pos, len
     # Offset Size Contents

@@ -803,6 +803,14 @@ module Spreadsheet
       book = Spreadsheet::Workbook.new
       path = File.join @var, 'test_write_workbook.xls'
       sheet1 = book.create_worksheet
+
+      format = Format.new
+      format.locked = true
+      sheet1.add_format format
+
+      sheet1.protect = true
+      sheet1.password = "test"
+
       str1 = 'My Shared String'
       str2 = 'Another Shared String'
       assert_equal 1, (str1.size + str2.size) % 2, 
@@ -911,9 +919,14 @@ module Spreadsheet
       assert_instance_of Spreadsheet::Excel::Worksheet, sheet
       name = "W\000o\000r\000k\000s\000h\000e\000e\000t\0001\000"
       name.force_encoding 'UTF-16LE' if name.respond_to?(:force_encoding)
+
       assert_equal name, sheet.name
       assert_not_nil sheet.offset
       assert_not_nil col = sheet.column(1)
+      
+      assert sheet.protect
+      assert_equal 52203, sheet.password
+
       assert_equal true, col.default_format.font.italic?
       assert_equal :blue, col.default_format.font.color
       assert_equal 20, col.width
