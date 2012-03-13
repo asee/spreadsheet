@@ -6,6 +6,7 @@ $: << File.expand_path('../lib', File.dirname(__FILE__))
 require 'test/unit'
 require 'spreadsheet'
 
+
 module Spreadsheet
   class TestWorksheet < Test::Unit::TestCase
     def setup
@@ -76,5 +77,12 @@ module Spreadsheet
       assert_equal 30, @sheet.column(0).width
       assert_equal 20, @sheet.column(1).width
     end
+
+    def test_should_get_and_set_locked
+      assert_nil @sheet.locked
+      @sheet.locked = true
+      assert @sheet.locked
+    end
+
   end
 end
